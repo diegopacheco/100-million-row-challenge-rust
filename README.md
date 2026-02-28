@@ -52,9 +52,47 @@ Or step by step:
 
 Data files are stored in `target/data/`.
 
-## Results
+## Result
 
-| Rows | Time |
-|------|------|
-| 1M   | ~0.1s |
-| 100M | run `./run.sh` to benchmark |
+```
+❯ ./run.sh
+    Finished `release` profile [optimized] target(s) in 0.02s
+=== Generating 100,000,000 rows ===
+Generated 10000000 rows...
+Generated 20000000 rows...
+Generated 30000000 rows...
+Generated 40000000 rows...
+Generated 50000000 rows...
+Generated 60000000 rows...
+Generated 70000000 rows...
+Generated 80000000 rows...
+Generated 90000000 rows...
+Generated 100000000 rows to target/data/measurements.txt
+
+=== Processing measurements.txt ===
+Processed 50 unique paths to target/data/output.json
+Completed in 4.171s
+
+=== Done ===
+Output written to target/data/output.json
+{
+    "\/blog\/11-million-rows-in-seconds": {
+        "2024-01-01": 1948,
+        "2024-01-02": 1934,
+        "2024-01-03": 1971,
+        "2024-01-04": 1947,
+        "2024-01-05": 1966,
+        "2024-01-06": 1959,
+        "2024-01-07": 1928,
+        "2024-01-08": 1998,
+        "2024-01-09": 1994,
+        "2024-01-10": 1940,
+        "2024-01-11": 1946,
+        "2024-01-12": 2055,
+        "2024-01-13": 1899,
+        "2024-01-14": 1961,
+        "2024-01-15": 1971,
+        "2024-01-16": 2017,
+        "2024-01-17": 1899,
+        "2024-01-18": 1952,
+```
