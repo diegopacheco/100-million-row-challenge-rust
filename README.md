@@ -96,3 +96,9 @@ Output written to target/data/output.json
         "2024-01-17": 1899,
         "2024-01-18": 1952,
 ```
+
+### Related POC
+
+* 100MRC Rust -> https://github.com/diegopacheco/100-million-row-challenge-rust
+* 100MRC Zig -> https://github.com/diegopacheco/100-million-row-challenge-zig
+* 1000RC Java 25 -> https://github.com/diegopacheco/100-million-row-challenge-java
