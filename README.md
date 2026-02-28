@@ -56,7 +56,7 @@ Data files are stored in `target/data/`.
 
 ```
 ❯ ./run.sh
-    Finished `release` profile [optimized] target(s) in 0.00s
+    Finished `release` profile [optimized] target(s) in 0.01s
 === Generating 100,000,000 rows ===
 Generated 10000000 rows...
 Generated 20000000 rows...
@@ -71,30 +71,30 @@ Generated 100000000 rows to target/data/measurements.txt
 
 === Processing measurements.txt ===
 Processed 50 unique paths to target/data/output.json
-Completed in 1.587s
+Completed in 1.048s
 
 === Done ===
 Output written to target/data/output.json
 {
     "\/blog\/11-million-rows-in-seconds": {
-        "2024-01-01": 1958,
-        "2024-01-02": 1910,
-        "2024-01-03": 1944,
-        "2024-01-04": 1976,
-        "2024-01-05": 2053,
-        "2024-01-06": 1994,
-        "2024-01-07": 1984,
-        "2024-01-08": 1985,
-        "2024-01-09": 2014,
-        "2024-01-10": 1987,
-        "2024-01-11": 2030,
-        "2024-01-12": 1952,
-        "2024-01-13": 2055,
+        "2024-01-01": 1992,
+        "2024-01-02": 1966,
+        "2024-01-03": 1997,
+        "2024-01-04": 1983,
+        "2024-01-05": 2024,
+        "2024-01-06": 1920,
+        "2024-01-07": 1918,
+        "2024-01-08": 2015,
+        "2024-01-09": 2000,
+        "2024-01-10": 1981,
+        "2024-01-11": 2035,
+        "2024-01-12": 1944,
+        "2024-01-13": 1982,
         "2024-01-14": 2004,
-        "2024-01-15": 1914,
-        "2024-01-16": 2008,
-        "2024-01-17": 1972,
-        "2024-01-18": 1983,
+        "2024-01-15": 2025,
+        "2024-01-16": 1998,
+        "2024-01-17": 1971,
+        "2024-01-18": 1975,
 ```
 
 ### Related POC

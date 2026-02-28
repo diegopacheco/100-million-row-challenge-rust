@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 memmap2 = "0.9"
 rand = "0.8"
+ahash = "0.8"
+memchr = "2"
 
 [profile.release]
 opt-level = 3

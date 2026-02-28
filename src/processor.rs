@@ -1,16 +1,17 @@
-use std::collections::HashMap;
+use ahash::AHashMap;
 use std::fs::File;
 use std::io::{BufWriter, Write};
 use memmap2::Mmap;
+use memchr::memchr;
 
-type VisitMap<'a> = HashMap<&'a str, HashMap<[u8; 10], u64>>;
+type VisitMap<'a> = AHashMap<&'a str, AHashMap<[u8; 10], u64>>;
 
 fn parse_line(line: &[u8]) -> Option<(&str, [u8; 10])> {
     if line.is_empty() {
         return None;
     }
 
-    let comma_pos = line.iter().rposition(|&b| b == b',')?;
+    let comma_pos = memchr::memrchr(b',', line)?;
     let url = std::str::from_utf8(&line[..comma_pos]).ok()?;
     let datetime = &line[comma_pos + 1..];
 
@@ -27,20 +28,18 @@ fn parse_line(line: &[u8]) -> Option<(&str, [u8; 10])> {
 }
 
 fn process_chunk<'a>(chunk: &'a [u8]) -> VisitMap<'a> {
-    let mut map: VisitMap<'a> = HashMap::new();
+    let mut map: VisitMap<'a> = AHashMap::with_capacity(64);
 
     let mut start = 0;
     while start < chunk.len() {
-        let end = chunk[start..]
-            .iter()
-            .position(|&b| b == b'\n')
+        let end = memchr(b'\n', &chunk[start..])
             .map(|p| start + p)
             .unwrap_or(chunk.len());
 
         let line = &chunk[start..end];
         if let Some((path, date)) = parse_line(line) {
             *map.entry(path)
-                .or_default()
+                .or_insert_with(|| AHashMap::with_capacity(1024))
                 .entry(date)
                 .or_insert(0) += 1;
         }
