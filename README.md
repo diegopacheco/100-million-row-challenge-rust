@@ -124,8 +124,8 @@ Output written to target/data/output.json
   │ Parallelism       │ std.Thread.spawn (OS threads) │ std::thread::scope (scoped │ Virtual threads                          │
   │                   │                               │  threads)                  │ (newVirtualThreadPerTaskExecutor)        │
   ├───────────────────┼───────────────────────────────┼────────────────────────────┼──────────────────────────────────────────┤
-  │ Map type          │ StringArrayHashMap (flat      │ HashMap (std)              │ HashMap<Long, HashMap<Long, Long>>       │
-  │                   │ array)                        │                            │                                          │
+  │ Map type          │ StringArrayHashMap (flat      │ AHashMap (ahash, non-crypto│ HashMap<Long, HashMap<Long, Long>>       │
+  │                   │ array)                        │ graphic, pre-allocated)     │                                          │
   ├───────────────────┼───────────────────────────────┼────────────────────────────┼──────────────────────────────────────────┤
   │ Path key          │ []const u8 slice (zero-copy   │ &str (borrowed from mmap)  │ long hash (custom encodePath)            │
   │                   │ from mmap)                    │                            │                                          │
@@ -138,7 +138,8 @@ Output written to target/data/output.json
   │ Build             │ -Doptimize=ReleaseFast        │ opt-level=3, lto=true,     │ None (plain javac)                       │
   │ optimization      │                               │ codegen-units=1            │                                          │
   ├───────────────────┼───────────────────────────────┼────────────────────────────┼──────────────────────────────────────────┤
-  │ External deps     │ 0                             │ 2 (memmap2, rand)          │ 0                                        │
+  │ External deps     │ 0                             │ 4 (memmap2, rand, ahash,   │ 0                                        │
+  │                   │                               │ memchr)                    │                                          │
   ├───────────────────┼───────────────────────────────┼────────────────────────────┼──────────────────────────────────────────┤
   │ Lines of code     │ ~150                          │ ~120                       │ ~180                                     │
   │ (processor)       │                               │                            │                                          │
