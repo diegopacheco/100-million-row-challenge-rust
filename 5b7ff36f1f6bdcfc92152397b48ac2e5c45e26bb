@@ -1,0 +1,36 @@
+src/processor.rs
+  eef1df58fcce502a 1-132
+src/main.rs
+  eef1df58fcce502a 1-38
+src/generator.rs
+  eef1df58fcce502a 1-90
+run.sh
+  eef1df58fcce502a 1-15
+.gitignore
+  eef1df58fcce502a 16-18
+Cargo.toml
+  eef1df58fcce502a 1-16
+design-doc.md
+  eef1df58fcce502a 1-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.6",
+  "base_commit_sha": "5b7ff36f1f6bdcfc92152397b48ac2e5c45e26bb",
+  "prompts": {
+    "eef1df58fcce502a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b5243ccf-5010-4340-a7de-c7300364ef64",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "diegopacheco <diego.pacheco.it@gmail.com>",
+      "messages": [],
+      "total_additions": 433,
+      "total_deletions": 8,
+      "accepted_lines": 425,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/66a54e92f9391148c33a2a94a9c146e839ccbc062581d42aeda04e23157ea35d"
+    }
+  }
+}
