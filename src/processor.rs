@@ -1,19 +1,18 @@
-use std::collections::BTreeMap;
+use std::collections::HashMap;
 use std::fs::File;
-use std::io::Write;
+use std::io::{BufWriter, Write};
 use memmap2::Mmap;
-use rayon::prelude::*;
 
-type VisitMap = BTreeMap<String, BTreeMap<String, u64>>;
+type VisitMap<'a> = HashMap<&'a str, HashMap<[u8; 10], u64>>;
 
-fn parse_line(line: &[u8]) -> Option<(&str, &str)> {
+fn parse_line(line: &[u8]) -> Option<(&str, [u8; 10])> {
     if line.is_empty() {
         return None;
     }
 
     let comma_pos = line.iter().rposition(|&b| b == b',')?;
     let url = std::str::from_utf8(&line[..comma_pos]).ok()?;
-    let datetime = std::str::from_utf8(&line[comma_pos + 1..]).ok()?;
+    let datetime = &line[comma_pos + 1..];
 
     let path_start = url.find("://")?;
     let path_start = url[path_start + 3..].find('/').map(|p| p + path_start + 3)?;
@@ -22,13 +21,13 @@ fn parse_line(line: &[u8]) -> Option<(&str, &str)> {
     if datetime.len() < 10 {
         return None;
     }
-    let date = &datetime[..10];
+    let date: [u8; 10] = datetime[..10].try_into().ok()?;
 
     Some((path, date))
 }
 
-fn process_chunk(chunk: &[u8]) -> VisitMap {
-    let mut map: VisitMap = BTreeMap::new();
+fn process_chunk<'a>(chunk: &'a [u8]) -> VisitMap<'a> {
+    let mut map: VisitMap<'a> = HashMap::new();
 
     let mut start = 0;
     while start < chunk.len() {
@@ -40,9 +39,9 @@ fn process_chunk(chunk: &[u8]) -> VisitMap {
 
         let line = &chunk[start..end];
         if let Some((path, date)) = parse_line(line) {
-            *map.entry(path.to_string())
+            *map.entry(path)
                 .or_default()
-                .entry(date.to_string())
+                .entry(date)
                 .or_insert(0) += 1;
         }
 
@@ -52,7 +51,7 @@ fn process_chunk(chunk: &[u8]) -> VisitMap {
     map
 }
 
-fn merge_maps(mut a: VisitMap, b: VisitMap) -> VisitMap {
+fn merge_maps<'a>(mut a: VisitMap<'a>, b: VisitMap<'a>) -> VisitMap<'a> {
     for (path, dates) in b {
         let entry = a.entry(path).or_default();
         for (date, count) in dates {
@@ -67,7 +66,9 @@ pub fn process(input_path: &str, output_path: &str) {
     let mmap = unsafe { Mmap::map(&file).expect("Failed to mmap file") };
     let data = &mmap[..];
 
-    let num_threads = rayon::current_num_threads();
+    let num_threads = std::thread::available_parallelism()
+        .map(|n| n.get())
+        .unwrap_or(4);
     let chunk_size = data.len() / num_threads;
 
     let mut boundaries = Vec::with_capacity(num_threads + 1);
@@ -90,43 +91,59 @@ pub fn process(input_path: &str, output_path: &str) {
         .map(|w| &data[w[0]..w[1]])
         .collect();
 
-    let result = chunks
-        .par_iter()
-        .map(|chunk| process_chunk(chunk))
-        .reduce(BTreeMap::new, merge_maps);
+    let result = std::thread::scope(|s| {
+        let handles: Vec<_> = chunks
+            .iter()
+            .map(|chunk| s.spawn(|| process_chunk(chunk)))
+            .collect();
 
-    let json = format_json(&result);
+        handles
+            .into_iter()
+            .map(|h| h.join().unwrap())
+            .reduce(merge_maps)
+            .unwrap_or_default()
+    });
 
-    let mut out = File::create(output_path).expect("Failed to create output file");
-    out.write_all(json.as_bytes()).expect("Failed to write output");
+    write_json(&result, output_path);
 
     eprintln!("Processed {} unique paths to {}", result.len(), output_path);
 }
 
-fn format_json(map: &VisitMap) -> String {
-    let mut out = String::from("{\n");
-    let total = map.len();
+fn write_json(map: &VisitMap, path: &str) {
+    let file = File::create(path).expect("Failed to create output file");
+    let mut out = BufWriter::with_capacity(1024 * 1024, file);
 
-    for (i, (path, dates)) in map.iter().enumerate() {
+    let mut paths: Vec<&&str> = map.keys().collect();
+    paths.sort();
+    let total = paths.len();
+
+    out.write_all(b"{\n").unwrap();
+
+    for (i, path) in paths.iter().enumerate() {
         let escaped_path = path.replace("/", "\\/");
-        out.push_str(&format!("    \"{}\": {{\n", escaped_path));
+        write!(out, "    \"{}\": {{\n", escaped_path).unwrap();
 
+        let dates_map = &map[**path];
+        let mut dates: Vec<(&[u8; 10], &u64)> = dates_map.iter().collect();
+        dates.sort_by_key(|(d, _)| *d);
         let date_total = dates.len();
+
         for (j, (date, count)) in dates.iter().enumerate() {
-            out.push_str(&format!("        \"{}\": {}", date, count));
+            let date_str = std::str::from_utf8(date.as_slice()).unwrap();
+            write!(out, "        \"{}\": {}", date_str, count).unwrap();
             if j < date_total - 1 {
-                out.push(',');
+                out.write_all(b",").unwrap();
             }
-            out.push('\n');
+            out.write_all(b"\n").unwrap();
         }
 
-        out.push_str("    }");
+        out.write_all(b"    }").unwrap();
         if i < total - 1 {
-            out.push(',');
+            out.write_all(b",").unwrap();
         }
-        out.push('\n');
+        out.write_all(b"\n").unwrap();
     }
 
-    out.push('}');
-    out
+    out.write_all(b"}").unwrap();
+    out.flush().unwrap();
 }
