@@ -1,0 +1,26 @@
+src/processor.rs
+  4b1e9486ac91fd17 1,5,7,14,31,35,42
+Cargo.toml
+  4b1e9486ac91fd17 9-10
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.6",
+  "base_commit_sha": "49b53e070a390f17bed2f5cf896368952467afe2",
+  "prompts": {
+    "4b1e9486ac91fd17": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fa9cdefc-b47b-45a8-ac6d-63f237636eb2",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "diegopacheco <diego.pacheco.it@gmail.com>",
+      "messages": [],
+      "total_additions": 9,
+      "total_deletions": 8,
+      "accepted_lines": 9,
+      "overriden_lines": 0,
+      "messages_url": "https://usegitai.com/cas/0fc3f62598f7d7d117b86347ee471a7bc264aed05bf27e2fe9726d4e4beb0e4e"
+    }
+  }
+}
