@@ -27,8 +27,11 @@ https://stitcher.io/blog/11-million-rows-in-seconds,2026-01-24T01:12:11+00:00
 
 - Memory-mapped file I/O via `memmap2` for zero-copy reads
 - File is split into chunks aligned to newline boundaries (one chunk per CPU core)
-- Each chunk is processed in parallel using `rayon`
-- Thread-local `BTreeMap` results are merged at the end
+- Each chunk is processed in parallel using `std::thread::scope` (scoped threads)
+- `ahash::AHashMap` instead of std HashMap (non-cryptographic hash, much faster for this use case)
+- `memchr` crate for SIMD-accelerated newline and comma scanning
+- Pre-allocated HashMap capacity (64 for paths, 1024 for dates) to avoid rehashing
+- Thread-local results are merged at the end
 - Output is sorted alphabetically by path and date
 
 ## Build
@@ -71,7 +74,7 @@ Generated 100000000 rows to target/data/measurements.txt
 
 === Processing measurements.txt ===
 Processed 50 unique paths to target/data/output.json
-Completed in 1.048s
+Completed in 1.031s
 
 === Done ===
 Output written to target/data/output.json
@@ -110,11 +113,11 @@ Output written to target/data/output.json
   ┌───────────────────┬───────────────────────────────┬────────────────────────────┬──────────────────────────────────────────┐
   │      Aspect       │              Zig              │            Rust            │                 Java 25                  │
   ├───────────────────┼───────────────────────────────┼────────────────────────────┼──────────────────────────────────────────┤
-  │ Time              │ 0.765s                        │ 1.587s                     │ 2.063s                                   │
+  │ Time              │ 0.765s                        │ 1.031s                     │ 2.063s                                   │
   ├───────────────────┼───────────────────────────────┼────────────────────────────┼──────────────────────────────────────────┤
-  │ Throughput        │ ~130.7M rows/s                │ ~63.0M rows/s              │ ~48.5M rows/s                            │
+  │ Throughput        │ ~130.7M rows/s                │ ~97.0M rows/s              │ ~48.5M rows/s                            │
   ├───────────────────┼───────────────────────────────┼────────────────────────────┼──────────────────────────────────────────┤
-  │ vs Fastest        │ 1.0x (baseline)               │ 2.07x slower               │ 2.70x slower                             │
+  │ vs Fastest        │ 1.0x (baseline)               │ 1.35x slower               │ 2.70x slower                             │
   ├───────────────────┼───────────────────────────────┼────────────────────────────┼──────────────────────────────────────────┤
   │ I/O               │ posix.mmap (direct)           │ memmap2 crate (mmap)       │ MemorySegment + Foreign API (mmap)       │
   ├───────────────────┼───────────────────────────────┼────────────────────────────┼──────────────────────────────────────────┤
